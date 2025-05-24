@@ -11,7 +11,10 @@ class ai4artsed_openrouter:
         return {
             "required": {
                 "input_prompt": ("STRING", {"forceInput": True, "multiline": True}),
-                "input_context": ("STRING", {"forceInput": True, "multiline": True}),
+                "input_context": ("STRING", {
+                    "default": "Input CONTEXT here",
+                    "multiline": True
+                 }),
                 "style_prompt": ("STRING", {
                     "default": "Translate the prompt according to the context. Translate epistemic, cultural, and aesthetic, as well as value-related contexts.",
                     "multiline": True
