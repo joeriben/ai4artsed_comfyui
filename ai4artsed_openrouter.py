@@ -21,9 +21,7 @@ class ai4artsed_openrouter:
                 }),
                 "api_key": ("STRING", {"multiline": False, "password": True}),
                 "model": ([
-                    "anthropic/claude-3.7-sonnet:thinking",
-                    "anthropic/claude-3.7-sonnet",
-                    "anthropic/claude-3-opus",
+                    "anthropic/claude-sonnet-4",
                     "deepseek/deepseek-chat-v3-0324",
                     "deepseek/deepseek-r1",
                     "deepseek/deepseek-r1:free",
