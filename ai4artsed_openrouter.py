@@ -21,8 +21,8 @@ class ai4artsed_openrouter:
                 }),
                 "api_key": ("STRING", {"multiline": False, "password": True}),
                 "model": ([
-                    "anthropic/claude-sonnet-4", #200K context$3/M input tokens $15/M output tokens $4.80/K input img
-                    "deepseek/deepseek-chat-v3-0324", #164K context$ 0.30/M input tokens $0.88/M output tokens
+                    "anthropic/claude-sonnet-4", #200K context $3/M input tokens $15/M output tokens $4.80/K input img
+                    "deepseek/deepseek-chat-v3-0324", #164K context $ 0.30/M input tokens $0.88/M output tokens
                     "deepseek/deepseek-r1", #164K context $0.50/M input tokens $2.18/M output tokens
                     "google/gemini-2.5-pro-preview", #1.05M context $1.25/M input tokens $10/M output tokens $5.16/K input imgs
                     "meta-llama/llama-3.3-70b-instruct", #131K context $0.07/M input tokens $0.25/M output tokens
