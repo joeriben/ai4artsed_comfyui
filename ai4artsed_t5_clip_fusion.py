@@ -58,6 +58,8 @@ class ai4artsed_t5_clip_fusion:
                 "clip_conditioning": ("CONDITIONING",),
                 "t5_conditioning": ("CONDITIONING",),
                 "alpha": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.05}),
+            },
+            "optional": {
             }
         }
 
