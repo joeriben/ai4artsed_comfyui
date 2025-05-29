@@ -7,8 +7,9 @@ from .ai4artsed_random_instruction_generator import ai4artsed_random_instruction
 from .ai4artsed_random_artform_generator import ai4artsed_random_artform_generator
 from .ai4artsed_random_language_selector import ai4artsed_random_language_selector
 from .ai4artsed_openrouter_key import ai4artsed_openrouter_key
+from .ai4artsed_t5_clip_fusion import ai4artsed_t5_clip_fusion
 
-NODE_CLASS_MAPPINGS = {
+NODE_CLASSES = {
     "ai4artsed_ollama": ai4artsed_ollama,
     "ai4artsed_ollama_imageanalysis": ai4artsed_ollama_imageanalysis,
     "ai4artsed_openrouter": ai4artsed_openrouter,
@@ -18,6 +19,7 @@ NODE_CLASS_MAPPINGS = {
     "ai4artsed_random_artform_generator": ai4artsed_random_artform_generator,
     "ai4artsed_random_language_selector": ai4artsed_random_language_selector,
     "ai4artsed_openrouter_key": ai4artsed_openrouter_key,
+    "ai4artsed_t5_clip_fusion": ai4artsed_t5_clip_fusion,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -26,8 +28,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ai4artsed_openrouter": "AI4ArtsEd OpenRouter Promptinterception",
     "ai4artsed_openrouter_imageanalysis": "AI4ArtsEd OpenRouter Image Analysis",
     "ai4artsed_text_remix": "AI4ArtsEd Text Remix",
-    "ai4artsed_random_instruction_generator": "Random Instruction Generator",
-    "ai4artsed_random_artform_generator": "Random Artform Generator",
-    "ai4artsed_random_language_selector": "Random Language Selector",
-    "ai4artsed_openrouter_key": "Secure Access to OpenRouter API Key",
+    "ai4artsed_random_instruction_generator": "AI4ArtsEd Random Instruction Generator",
+    "ai4artsed_random_artform_generator": "AI4ArtsEd Random Artform Generator",
+    "ai4artsed_random_language_selector": "AI4ArtsEd Random Language Selector",
+    "ai4artsed_openrouter_key": "AI4ArtsEd Secure Access to OpenRouter API Key",
+    "ai4artsed_t5_clip_fusion": "AI4ArtsEd T5-CLIP Fusion",
 }
