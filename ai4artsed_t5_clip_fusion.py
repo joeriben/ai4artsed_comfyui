@@ -23,8 +23,8 @@ Workflow:
 
 How it works:
     • Takes CLIP conditioning from any CLIP encoder (CLIP-L, CLIP-G, or DUAL-CLIP)
-    • Takes T5 embeddings from a T5 encoder
-    • The T5 sequence is **mean‑pooled to a single 768‑d vector**,
+    • Takes T5 conditioning from a CLIPTextEncode node using a T5 model
+    • The T5 tokens are **mean‑pooled to a single 768‑d vector**,
       L2‑normalised and then broadcast‑added onto **each of the 77 CLIP token
       rows**.
 
@@ -51,7 +51,7 @@ class ai4artsed_t5_clip_fusion:
         return {
             "required": {
                 "clip_conditioning": ("CONDITIONING",),
-                "t5_embeddings": ("EMBEDDINGS",),
+                "t5_conditioning": ("CONDITIONING",),
                 "alpha": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.05}),
             }
         }
@@ -60,24 +60,18 @@ class ai4artsed_t5_clip_fusion:
     FUNCTION = "fuse"
     CATEGORY = "AI4ArtsEd"
 
-    def fuse(self, clip_conditioning, t5_embeddings, alpha):
+    def fuse(self, clip_conditioning, t5_conditioning, alpha):
         # clip_conditioning is a tuple (tokens, pooled) where tokens: (B,77,768)
         clip_tokens, clip_pooled = clip_conditioning
         
-        # Handle different possible formats of t5_embeddings
-        if isinstance(t5_embeddings, tuple) and len(t5_embeddings) > 0:
-            # If t5_embeddings is a tuple, use the first element
-            t5_embeds = t5_embeddings[0]
-        else:
-            # Otherwise use it directly
-            t5_embeds = t5_embeddings
+        # t5_conditioning is also a tuple (tokens, pooled) where tokens: (B,77,768)
+        t5_tokens, t5_pooled = t5_conditioning
+        
+        # Extract the token embeddings from T5
+        t5_embeds = t5_tokens
             
-        # Ensure t5_embeds is a tensor
-        if not isinstance(t5_embeds, torch.Tensor):
-            raise ValueError("T5 embeddings must be a tensor or a tuple containing a tensor")
-            
-        # t5_embeds shape should be (B,Seq,768)
-        # Mean‑pool along sequence dimension
+        # t5_embeds shape should be (B,77,768)
+        # Mean‑pool along sequence dimension (token dimension)
         t5_vec = t5_embeds.mean(dim=1)  # (B,768)
         
         # L2‑norm
