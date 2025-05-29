@@ -28,6 +28,7 @@ How it works:
       - Standard CONDITIONING format (tuple or list of tokens and pooled)
       - Single tensor format
       - Single-element tuple or list containing a tensor
+      - Nested list structures from ComfyUI
     • The T5 tokens are **mean‑pooled to a single 768‑d vector**,
       L2‑normalised and then broadcast‑added onto **each of the 77 CLIP token
       rows**.
@@ -69,54 +70,60 @@ class ai4artsed_t5_clip_fusion:
         print("DEBUG INFO FOR ai4artsed_t5_clip_fusion:")
         print(f"clip_conditioning type: {type(clip_conditioning)}")
         print(f"clip_conditioning length: {len(clip_conditioning) if hasattr(clip_conditioning, '__len__') else 'N/A'}")
-        print(f"clip_conditioning content: {clip_conditioning}")
         
-        if isinstance(clip_conditioning, list):
-            print("List elements types:")
-            for i, item in enumerate(clip_conditioning):
-                print(f"  Element {i}: {type(item)}")
-                if hasattr(item, 'shape'):
-                    print(f"    Shape: {item.shape}")
-                elif hasattr(item, '__len__'):
-                    print(f"    Length: {len(item)}")
+        # Extract clip tokens and pooled output
+        clip_tokens = None
+        clip_pooled = None
         
-        print(f"t5_conditioning type: {type(t5_conditioning)}")
-        print(f"t5_conditioning length: {len(t5_conditioning) if hasattr(t5_conditioning, '__len__') else 'N/A'}")
-        
-        # Try a more permissive approach - accept any input and try to extract tensors
         try:
-            # For clip_conditioning
-            clip_tokens = None
-            clip_pooled = None
+            # Handle nested list structure: [[tensor, dict]]
+            if isinstance(clip_conditioning, list) and len(clip_conditioning) == 1:
+                if isinstance(clip_conditioning[0], list) and len(clip_conditioning[0]) == 2:
+                    inner_list = clip_conditioning[0]
+                    if isinstance(inner_list[0], torch.Tensor) and isinstance(inner_list[1], dict):
+                        clip_tokens = inner_list[0]
+                        if 'pooled_output' in inner_list[1]:
+                            clip_pooled = inner_list[1]['pooled_output']
+                        else:
+                            # Create a default pooled output if not available
+                            clip_pooled = torch.zeros(1, clip_tokens.size(-1), dtype=clip_tokens.dtype, device=clip_tokens.device)
             
-            if isinstance(clip_conditioning, (tuple, list)) and len(clip_conditioning) >= 2:
+            # Handle standard tuple/list structure: (tensor, tensor)
+            elif isinstance(clip_conditioning, (tuple, list)) and len(clip_conditioning) >= 2:
                 clip_tokens, clip_pooled = clip_conditioning[0], clip_conditioning[1]
-            elif isinstance(clip_conditioning, (tuple, list)) and len(clip_conditioning) == 1:
-                if isinstance(clip_conditioning[0], torch.Tensor):
-                    clip_tokens = clip_conditioning[0]
-                    clip_pooled = torch.zeros(1, 768, dtype=clip_tokens.dtype, device=clip_tokens.device)
+            
+            # Handle single tensor
             elif isinstance(clip_conditioning, torch.Tensor):
                 clip_tokens = clip_conditioning
-                clip_pooled = torch.zeros(1, 768, dtype=clip_tokens.dtype, device=clip_tokens.device)
+                clip_pooled = torch.zeros(1, clip_tokens.size(-1), dtype=clip_tokens.dtype, device=clip_tokens.device)
             
+            # If we couldn't extract clip_tokens, raise an error
             if clip_tokens is None:
                 raise ValueError(f"Could not extract tensor from clip_conditioning: {type(clip_conditioning)}")
             
             print(f"Successfully extracted clip_tokens with shape: {clip_tokens.shape}")
-            print(f"Successfully extracted clip_pooled with shape: {clip_pooled.shape}")
+            if clip_pooled is not None:
+                print(f"Successfully extracted clip_pooled with shape: {clip_pooled.shape}")
             
-            # For t5_conditioning
+            # Extract t5 embeddings
             t5_embeds = None
             
-            # Case 1: t5_conditioning is a tuple or list with 2+ elements (tokens, pooled)
-            if isinstance(t5_conditioning, (tuple, list)) and len(t5_conditioning) >= 2:
-                t5_embeds = t5_conditioning[0]  # Use the first element (tokens)
+            # Handle nested list structure: [[tensor, dict]]
+            if isinstance(t5_conditioning, list) and len(t5_conditioning) == 1:
+                if isinstance(t5_conditioning[0], list) and len(t5_conditioning[0]) == 2:
+                    inner_list = t5_conditioning[0]
+                    if isinstance(inner_list[0], torch.Tensor):
+                        t5_embeds = inner_list[0]
             
-            # Case 2: t5_conditioning is a single tensor
+            # Handle standard tuple/list structure: (tensor, tensor)
+            elif isinstance(t5_conditioning, (tuple, list)) and len(t5_conditioning) >= 2:
+                t5_embeds = t5_conditioning[0]
+            
+            # Handle single tensor
             elif isinstance(t5_conditioning, torch.Tensor):
                 t5_embeds = t5_conditioning
             
-            # Case 3: t5_conditioning is a single-element tuple or list containing a tensor
+            # Handle single-element tuple/list containing a tensor
             elif isinstance(t5_conditioning, (tuple, list)) and len(t5_conditioning) == 1:
                 if isinstance(t5_conditioning[0], torch.Tensor):
                     t5_embeds = t5_conditioning[0]
@@ -144,16 +151,22 @@ class ai4artsed_t5_clip_fusion:
             # Fuse the embeddings with alpha weighting
             fused_tokens = clip_tokens + alpha * t5_tokens
             
-            # Return the fused conditioning
-            return ((fused_tokens, clip_pooled),)
+            # Return the fused conditioning in the same format as the input
+            if isinstance(clip_conditioning, list) and len(clip_conditioning) == 1 and isinstance(clip_conditioning[0], list):
+                # Return in nested list format
+                result = [[fused_tokens, clip_conditioning[0][1]]]
+                print(f"Returning result in nested list format: {type(result)}")
+                return (result,)
+            else:
+                # Return in standard tuple format
+                result = (fused_tokens, clip_pooled)
+                print(f"Returning result in standard tuple format: {type(result)}")
+                return (result,)
             
         except Exception as e:
             print(f"ERROR in ai4artsed_t5_clip_fusion: {str(e)}")
-            # Return empty conditioning as fallback
-            if isinstance(clip_conditioning, (tuple, list)) and len(clip_conditioning) >= 2:
-                return clip_conditioning  # Return original conditioning
-            else:
-                raise e  # Re-raise the exception if we can't provide a fallback
+            # Return original conditioning as fallback
+            return (clip_conditioning,)
 
 
 # ---- ComfyUI registration ---------------------------------------------------
