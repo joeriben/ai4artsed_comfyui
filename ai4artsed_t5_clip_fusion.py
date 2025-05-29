@@ -73,7 +73,8 @@ class AI4ArtsEdT5ClipFusion:
 
 
 # ---- ComfyUI registration ---------------------------------------------------
-NODE_CLASS_MAPPINGS = {
+
+NODE_CLASSES = {
     "AI4ArtsEdT5ClipFusion": AI4ArtsEdT5ClipFusion,
 }
 
