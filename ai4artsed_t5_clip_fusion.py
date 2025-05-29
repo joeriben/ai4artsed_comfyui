@@ -25,9 +25,9 @@ How it works:
     • Takes CLIP conditioning from any CLIP encoder (CLIP-L, CLIP-G, or DUAL-CLIP)
     • Takes T5 conditioning from a CLIPTextEncode node using a T5 model
     • Handles various input formats robustly:
-      - Standard CONDITIONING format (tuple of tokens and pooled)
+      - Standard CONDITIONING format (tuple or list of tokens and pooled)
       - Single tensor format
-      - Single-element tuple containing a tensor
+      - Single-element tuple or list containing a tensor
     • The T5 tokens are **mean‑pooled to a single 768‑d vector**,
       L2‑normalised and then broadcast‑added onto **each of the 77 CLIP token
       rows**.
@@ -65,26 +65,26 @@ class ai4artsed_t5_clip_fusion:
     CATEGORY = "AI4ArtsEd"
 
     def fuse(self, clip_conditioning, t5_conditioning, alpha):
-        # Handle clip_conditioning - expected to be a tuple (tokens, pooled)
-        if not isinstance(clip_conditioning, tuple) or len(clip_conditioning) < 2:
-            raise ValueError(f"clip_conditioning must be a tuple with at least 2 elements, got {type(clip_conditioning)}")
+        # Handle clip_conditioning - expected to be a tuple or list (tokens, pooled)
+        if not (isinstance(clip_conditioning, (tuple, list)) and len(clip_conditioning) >= 2):
+            raise ValueError(f"clip_conditioning must be a tuple or list with at least 2 elements, got {type(clip_conditioning)}")
         
         # Extract tokens and pooled from clip_conditioning
-        clip_tokens, clip_pooled = clip_conditioning
+        clip_tokens, clip_pooled = clip_conditioning[0], clip_conditioning[1]
         
         # Handle t5_conditioning - could be in different formats
         t5_embeds = None
         
-        # Case 1: t5_conditioning is a tuple with 2 elements (tokens, pooled)
-        if isinstance(t5_conditioning, tuple) and len(t5_conditioning) >= 2:
+        # Case 1: t5_conditioning is a tuple or list with 2+ elements (tokens, pooled)
+        if isinstance(t5_conditioning, (tuple, list)) and len(t5_conditioning) >= 2:
             t5_embeds = t5_conditioning[0]  # Use the first element (tokens)
         
         # Case 2: t5_conditioning is a single tensor
         elif isinstance(t5_conditioning, torch.Tensor):
             t5_embeds = t5_conditioning
         
-        # Case 3: t5_conditioning is a single-element tuple containing a tensor
-        elif isinstance(t5_conditioning, tuple) and len(t5_conditioning) == 1:
+        # Case 3: t5_conditioning is a single-element tuple or list containing a tensor
+        elif isinstance(t5_conditioning, (tuple, list)) and len(t5_conditioning) == 1:
             if isinstance(t5_conditioning[0], torch.Tensor):
                 t5_embeds = t5_conditioning[0]
         
