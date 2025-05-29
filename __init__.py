@@ -7,6 +7,7 @@ from .ai4artsed_random_instruction_generator import ai4artsed_random_instruction
 from .ai4artsed_random_artform_generator import ai4artsed_random_artform_generator
 from .ai4artsed_random_language_selector import ai4artsed_random_language_selector
 from .ai4artsed_openrouter_key import ai4artsed_openrouter_key
+from .ai4artsed_t5_clip_fusion import ai4artsed_t5_clip_fusion
 
 NODE_CLASS_MAPPINGS = {
     "ai4artsed_ollama": ai4artsed_ollama,
@@ -18,6 +19,7 @@ NODE_CLASS_MAPPINGS = {
     "ai4artsed_random_artform_generator": ai4artsed_random_artform_generator,
     "ai4artsed_random_language_selector": ai4artsed_random_language_selector,
     "ai4artsed_openrouter_key": ai4artsed_openrouter_key,
+    "ai4artsed_t5_clip_fusion": ai4artsed_t5_clip_fusion,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -30,4 +32,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ai4artsed_random_artform_generator": "Random Artform Generator",
     "ai4artsed_random_language_selector": "Random Language Selector",
     "ai4artsed_openrouter_key": "Secure Access to OpenRouter API Key",
+    "ai4artsed_t5_clip_fusion": "AI4ArtsEd T5‑CLIP Fusion",
 }
