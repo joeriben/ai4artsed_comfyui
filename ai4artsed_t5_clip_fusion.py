@@ -24,6 +24,10 @@ Workflow:
 How it works:
     • Takes CLIP conditioning from any CLIP encoder (CLIP-L, CLIP-G, or DUAL-CLIP)
     • Takes T5 conditioning from a CLIPTextEncode node using a T5 model
+    • Handles various input formats robustly:
+      - Standard CONDITIONING format (tuple of tokens and pooled)
+      - Single tensor format
+      - Single-element tuple containing a tensor
     • The T5 tokens are **mean‑pooled to a single 768‑d vector**,
       L2‑normalised and then broadcast‑added onto **each of the 77 CLIP token
       rows**.
@@ -61,16 +65,38 @@ class ai4artsed_t5_clip_fusion:
     CATEGORY = "AI4ArtsEd"
 
     def fuse(self, clip_conditioning, t5_conditioning, alpha):
-        # clip_conditioning is a tuple (tokens, pooled) where tokens: (B,77,768)
+        # Handle clip_conditioning - expected to be a tuple (tokens, pooled)
+        if not isinstance(clip_conditioning, tuple) or len(clip_conditioning) < 2:
+            raise ValueError(f"clip_conditioning must be a tuple with at least 2 elements, got {type(clip_conditioning)}")
+        
+        # Extract tokens and pooled from clip_conditioning
         clip_tokens, clip_pooled = clip_conditioning
         
-        # t5_conditioning is also a tuple (tokens, pooled) where tokens: (B,77,768)
-        t5_tokens, t5_pooled = t5_conditioning
+        # Handle t5_conditioning - could be in different formats
+        t5_embeds = None
         
-        # Extract the token embeddings from T5
-        t5_embeds = t5_tokens
-            
-        # t5_embeds shape should be (B,77,768)
+        # Case 1: t5_conditioning is a tuple with 2 elements (tokens, pooled)
+        if isinstance(t5_conditioning, tuple) and len(t5_conditioning) >= 2:
+            t5_embeds = t5_conditioning[0]  # Use the first element (tokens)
+        
+        # Case 2: t5_conditioning is a single tensor
+        elif isinstance(t5_conditioning, torch.Tensor):
+            t5_embeds = t5_conditioning
+        
+        # Case 3: t5_conditioning is a single-element tuple containing a tensor
+        elif isinstance(t5_conditioning, tuple) and len(t5_conditioning) == 1:
+            if isinstance(t5_conditioning[0], torch.Tensor):
+                t5_embeds = t5_conditioning[0]
+        
+        # If we couldn't extract t5_embeds, raise an error
+        if t5_embeds is None:
+            raise ValueError(f"Could not extract tensor from t5_conditioning: {type(t5_conditioning)}")
+        
+        # Ensure t5_embeds is a tensor with the right shape
+        if not isinstance(t5_embeds, torch.Tensor):
+            raise ValueError(f"t5_embeds must be a tensor, got {type(t5_embeds)}")
+        
+        # t5_embeds shape should be (B,Seq,768) where Seq could be 77 for CLIP or another length for T5
         # Mean‑pool along sequence dimension (token dimension)
         t5_vec = t5_embeds.mean(dim=1)  # (B,768)
         
