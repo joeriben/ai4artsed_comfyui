@@ -41,7 +41,7 @@ Category
 
 NODE_NAME = "AI4ArtsEd T5‑CLIP Fusion"
 
-class AI4ArtsEdT5ClipFusion:
+class ai4artsed_t5_clip_fusion:
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -75,9 +75,9 @@ class AI4ArtsEdT5ClipFusion:
 # ---- ComfyUI registration ---------------------------------------------------
 
 NODE_CLASSES = {
-    "AI4ArtsEdT5ClipFusion": AI4ArtsEdT5ClipFusion,
+    "ai4artsed_t5_clip_fusion": ai4artsed_t5_clip_fusion,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "AI4ArtsEdT5ClipFusion": NODE_NAME,
+    "ai4artsed_t5_clip_fusion": NODE_NAME,
 }
