@@ -54,7 +54,7 @@ class AI4ArtsEdT5ClipFusion:
 
     RETURN_TYPES = ("CONDITIONING",)
     FUNCTION = "fuse"
-    CATEGORY = "ai4artsed"
+    CATEGORY = "AI4ArtsEd"
 
     def fuse(self, clip_cond, t5_embeds, alpha):
         # clip_cond is a tuple (tokens, pooled)  where tokens: (B,77,768)
