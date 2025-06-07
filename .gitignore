@@ -51,4 +51,4 @@ ehthumbs.db
 
 # -------------------------------------
 # API keys / sensitive configuration
-openrouter.key
+*.key
