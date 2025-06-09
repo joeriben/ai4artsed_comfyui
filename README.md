@@ -2,6 +2,6 @@ The ai4artsed comfui project is a part of the "AI4ArtsEd" research project, spec
 
 It contains three repos that may be used together (if wanted):
 
-https://github.com/joeriben/ai4artsed_comfyui_nodes
-https://github.com/joeriben/ai4artsed_comfyui_workflows
-https://github.com/joeriben/ai4artsed_webserver
+- https://github.com/joeriben/ai4artsed_comfyui_nodes
+- https://github.com/joeriben/ai4artsed_comfyui_workflows (nodes required)
+- https://github.com/joeriben/ai4artsed_webserver (runs workflows in a simple web interface)
